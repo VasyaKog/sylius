@@ -1,0 +1,39 @@
+app:
+    container_name: app
+    image: busybox
+    volumes:
+        - ../:/var/www/
+
+nginx:
+    container_name: nginx
+    build: builds/nginx
+    volumes_from:
+        - app
+    links:
+        - php:php
+    volumes:
+        - ./logs/nginx:/var/log/nginx
+    ports:
+        - 8001:80
+
+php:
+    container_name: php
+    build: builds/php-fpm
+    volumes_from:
+        - app
+    links:
+        - mysql:mysql
+    working_dir: /var/www/
+
+mysql:
+    container_name: mysql
+    build: builds/mysql
+    volumes:
+        - ./mysql/db:/var/lib/mysql
+    environment:
+        MYSQL_ROOT_PASSWORD: root
+        MYSQL_DATABASE: db
+        MYSQL_USER: root
+        MYSQL_PASSWORD: root
+    ports:
+        - 3307:3306
